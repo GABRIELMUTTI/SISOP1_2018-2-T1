@@ -4,28 +4,30 @@
 #include "../include/support.h"
 #include "../include/cthread.h"
 #include "../include/cdata.h"
+#include "../include/scheduler.h"
 
+extern int first_time;
+extern const int STACK_SIZE;
 
 int ccreate (void* (*start)(void*), void *arg, int prio) {
 
-	testaseprimeiravez
+	if (first_time)
+	{
+		initialize_scheduler_main();
+	}
 
-	contextotcb  = create_TCB(prio)	
-	makecontext( contextotcb.context , start,arg
-	bota_apto(contextotcb) 
-	return contextotcb.tid;
-}
+	TCB_t* newTcb = create_tcb(prio);
 
-void bota_apto(TCB_t* contextotcb)
-{
-	switch(contectotcb->prio)
-		{ 
-			case 0
-			case 1
-			case 2
-		}
-	contextotcb.state = 1;
-	check_preempsao(contextotcb);
+	char stack[STACK_SIZE];
+
+	getcontext(&newTcb->context);
+	newTcb->context.uc_stack.ss_sp = stack;
+    newTcb->context.uc_stack.ss_size = sizeof(stack);
+    newTcb->context.uc_link = &get_scheduler()->context;
+
+	makecontext(&newTcb->context , start, arg);
+	put_ready(newTcb); 
+	return newTcb->tid;
 }
 
 void check_preempsao(TCB_t* novo_tcb )
