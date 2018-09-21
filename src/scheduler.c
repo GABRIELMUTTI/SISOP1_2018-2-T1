@@ -3,24 +3,63 @@
 void initialize_scheduler_main() {
 
     // Create main's TCB.
-	TCB_t* mainTcb = create_tcb(0);
-	getcontext(&mainTcb->context);
-
+	create_main_tcb();
+	
     // Create scheduler's TCB.
-	TCB_t* schedulerTcb = create_tcb(0);
-
-	char stack[STACK_SIZE];
-
-	getcontext(&schedulerTcb->context);
-	schedulerTcb->context.uc_stack.ss_sp = stack;
-    schedulerTcb->context.uc_stack.ss_size = sizeof(stack);
-    schedulerTcb->context.uc_link = &mainTcb->context;
-	makecontext(&schedulerTcb->context, &schedule, 0);
+	create_tcb(&schedule, 0, 0);
 }
 
 void schedule()
 {
-    // FALTA IMPLEMENTAR.
+	remove_executing();
+
+	// Puts scheduler TCB in executing queue.
+	AppendFila2(executingQueue, get_scheduler());
+
+    TCB_t* highestPriorityTcb = get_highest_priority_tcb();
+
+	if (highestPriorityTcb != 0)
+	{
+		execute_preemption(highestPriorityTcb);
+	}
+}
+
+TCB_t* get_scheduler()
+{
+	FirstFila2(tcbs);
+	NextFila2(tcbs);
+
+	return (TCB_t*)GetAtIteratorFila2(tcbs);
+}
+
+TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
+{
+	// Allocates stack and TCB.
+	char stack[STACK_SIZE];
+	TCB_t* newTcb = (TCB_t*)malloc(sizeof(TCB_t));
+
+	// Sets up the context.
+	getcontext(&newTcb->context);
+	newTcb->context.uc_link = &get_scheduler()->context;
+	newTcb->context.uc_stack.ss_sp = stack;
+	newTcb->context.uc_stack.ss_size = sizeof(stack);
+	makecontext(&newTcb->context, start, arg);
+
+	// Put new TCB in the TCB list.
+	AppendFila2(tcbs, newTcb);
+	
+	return newTcb;
+}
+
+TCB_t* create_main_tcb()
+{
+	TCB_t* mainTcb = (TCB_t*)malloc(sizeof(TCB_t));
+
+	getcontext(&mainTcb->context);
+
+	AppendFila2(tcbs, mainTcb);
+
+	return mainTcb;
 }
 
 void put_ready(TCB_t* tcb)
@@ -28,17 +67,17 @@ void put_ready(TCB_t* tcb)
 	switch(tcb->prio)
 		{ 
 			case 0:
-                // Put in queue 0.
+                AppendFila2(ready0Queue, tcb);
                 break;
 			case 1:
-                // Put in queue 1.
+                AppendFila2(ready1Queue, tcb);
                 break;
 			case 2:
-                // Put in queue 2.
+                AppendFila2(ready2Queue, tcb);
                 break;
 		}
+
 	tcb->state = PROCST_APTO;
-	check_preemption(tcb);
 }
 
 void check_preemption(TCB_t* tcb)
@@ -47,7 +86,49 @@ void check_preemption(TCB_t* tcb)
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 	if(executing->prio < tcb->prio)
     {
-        TrocaExecutando(tcb);
+        execute_preemption(tcb);
     }
-		
+}
+
+
+void execute_preemption(TCB_t* tcb)
+{
+	FirstFila2(executingQueue);
+	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
+
+	DeleteAtIteratorFila2(executingQueue);
+	put_ready(executing);
+
+	AppendFila2(executingQueue, tcb);
+
+	swapcontext(&executing->context, &tcb->context);
+}
+
+TCB_t* get_highest_priority_tcb()
+{
+	TCB_t* tcb = 0;
+	
+	// If queue is not empty and no errors occured:
+	int queueStatus = FirstFila2(ready0Queue);
+	if (queueStatus != 0)
+	{
+		tcb = (TCB_t*)GetAtIteratorFila2(ready0Queue);
+		return tcb;
+	}
+
+	queueStatus = FirstFila2(ready1Queue);
+	if (queueStatus != 0)
+	{
+		tcb = (TCB_t*)GetAtIteratorFila2(ready1Queue);
+		return tcb;
+	}
+
+	queueStatus = FirstFila2(ready2Queue);
+	if (queueStatus != 0)
+	{
+		tcb = (TCB_t*)GetAtIteratorFila2(ready2Queue);
+		return tcb;
+	}
+
+	return tcb;
 }

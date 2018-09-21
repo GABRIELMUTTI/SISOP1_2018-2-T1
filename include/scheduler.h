@@ -12,12 +12,20 @@ PFILA2 ready1Queue;
 PFILA2 ready2Queue;
 PFILA2 executingQueue;
 
+PFILA2 tcbs;
+
 
 void initialize_scheduler_main();
-TCB_t* create_tcb(int prio);
+TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio);
+TCB_t* create_main_tcb();
 TCB_t* get_scheduler();
 void schedule();
 void put_ready(TCB_t* tcb);
 void check_preemption(TCB_t* tcb);
+void execute_preemption(TCB_t* tcb);
+TCB_t* get_highest_priority_tcb();
+
+
+
 
 #endif

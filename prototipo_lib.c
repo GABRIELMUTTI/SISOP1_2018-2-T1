@@ -7,7 +7,6 @@
 #include "../include/scheduler.h"
 
 extern int first_time;
-extern const int STACK_SIZE;
 
 int ccreate (void* (*start)(void*), void *arg, int prio) {
 
@@ -16,46 +15,13 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 		initialize_scheduler_main();
 	}
 
-	TCB_t* newTcb = create_tcb(prio);
+	TCB_t* newTcb = create_tcb(start, arg, prio);
 
-	char stack[STACK_SIZE];
-
-	getcontext(&newTcb->context);
-	newTcb->context.uc_stack.ss_sp = stack;
-    newTcb->context.uc_stack.ss_size = sizeof(stack);
-    newTcb->context.uc_link = &get_scheduler()->context;
-
-	makecontext(&newTcb->context , start, arg);
 	put_ready(newTcb); 
+	check_preemption(newTcb);
+
 	return newTcb->tid;
 }
-
-void check_preempsao(TCB_t* novo_tcb )
-{
-	FirstFila2(filaexec);
-	TCB_t* tcb = (TCB_t*)GetAtIteratorFila2(filaexec);
-	if(tcb->prio < novo_tcb->prio) 
-		TrocaExecutando(novo_tcb);
-}
-
-void TrocaExecutando(TCB_t* novo_tcb)
-{
-	FirstFila2(filaexec);
-	TCB_t* tcb = (TCB_t*)GetAtIteratorFila2(filaexec);
-	swapcontext(&tcb->context, novo_tcp->context);
-	botar_apto(tcb);
-	botar_exec(novo_tcb);
-}
-
-void botar_exec(TCB_t* novo_tcb)
-{
-	FirstFila2(filaapto);
-	DeleteAtIteratorFila2(PFILA2 filaapto);
-	FirstFila2(filaexec);
-	DeleteAtIteratorFila2(PFILA2 filaexec);
-	
-}
-
 
 int csetprio(int tid, int prio) {
 	return -1;
