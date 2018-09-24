@@ -12,6 +12,7 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 
 	if (first_time)
 	{
+		first_time = 0;
 		initialize_scheduler_main();
 	}
 
