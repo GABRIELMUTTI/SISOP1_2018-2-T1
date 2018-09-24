@@ -31,6 +31,8 @@ int cyield(void) {
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 
+	put_ready(executing);
+
 	swapcontext(&executing->context, &get_scheduler()->context);
 }
 
