@@ -11,16 +11,21 @@ void initialize_scheduler_main() {
 
 void schedule()
 {
-	remove_executing();
+	TCB_t* highestPriorityTcb = get_next_ready_tcb();
 
-	// Puts scheduler TCB in executing queue.
-	AppendFila2(executingQueue, get_scheduler());
-
-    TCB_t* highestPriorityTcb = get_highest_priority_tcb();
-
-	if (highestPriorityTcb != NULL)
+	while (highestPriorityTcb != NULL)
 	{
-		execute_preemption(highestPriorityTcb);
+		remove_executing();
+
+		// Puts scheduler TCB in executing queue.
+		AppendFila2(executingQueue, get_scheduler());
+
+		if (highestPriorityTcb != NULL)
+		{
+			execute_preemption(highestPriorityTcb);
+		}
+
+		highestPriorityTcb = get_next_ready_tcb();
 	}
 }
 
@@ -86,6 +91,12 @@ void put_ready(TCB_t* tcb)
 	tcb->state = PROCST_APTO;
 }
 
+void put_blocked(TCB_t* tcb, PFILA2 blockedQueue)
+{
+	AppendFila2(tcb, blockedQueue);
+	tcb->state = PROCST_BLOQ;
+}
+
 void check_preemption(TCB_t* tcb)
 {
 	FirstFila2(executingQueue);
@@ -110,37 +121,26 @@ void execute_preemption(TCB_t* tcb)
 	swapcontext(&executing->context, &tcb->context);
 }
 
-TCB_t* get_highest_priority_tcb()
+TCB_t* get_next_ready_tcb()
 {
-	TCB_t* tcb = NULL;
+	TCB_t* tcb;
 	
-	// If queue is not empty and no errors occured:
-	int queueStatus = FirstFila2(ready0Queue);
-	if (queueStatus != 0)
-	{
-		tcb = (TCB_t*)GetAtIteratorFila2(ready0Queue);
-		return tcb;
-	}
+	tcb = get_highest_priority_tcb(ready0Queue);
+	if (tcb != NULL) { return tcb; }
 
-	queueStatus = FirstFila2(ready1Queue);
-	if (queueStatus != 0)
-	{
-		tcb = (TCB_t*)GetAtIteratorFila2(ready1Queue);
-		return tcb;
-	}
+	tcb = get_highest_priority_tcb(ready1Queue);
+	if (tcb != NULL) { return tcb; }
 
-	queueStatus = FirstFila2(ready2Queue);
-	if (queueStatus != 0)
-	{
-		tcb = (TCB_t*)GetAtIteratorFila2(ready2Queue);
-		return tcb;
-	}
-
+	tcb = get_highest_priority_tcb(ready2Queue);
 	return tcb;
 }
 
-TCB_t* get_tcb(int tid)
+TCB_t* get_highest_priority_ready_tcb()
 {
+	// FALTA IMPLEMENTAR.
+}
 
-
+TCB_t* get_highest_priority_blocked_tcb(PFILA2 queue)
+{
+	// FALTA IMPLEMENTAR.
 }

@@ -5,6 +5,7 @@
 
 #include "../include/cdata.h"
 #include "../include/support.h"
+#include "../include/cthread.h"
 
 int first_time;
 const int STACK_SIZE = 8192;
@@ -14,7 +15,11 @@ PFILA2 ready1Queue;
 PFILA2 ready2Queue;
 PFILA2 executingQueue;
 
+PFILA2 blockedQueue;
+PFILA2 semQueues;
+
 PFILA2 tcbs;
+PFILA2 sems;
 
 
 void initialize_scheduler_main();
@@ -23,10 +28,13 @@ TCB_t* create_main_tcb();
 TCB_t* get_scheduler();
 void schedule();
 void put_ready(TCB_t* tcb);
+void put_blocked(TCB_t* tcb, PFILA2 blockedQueue);
 void check_preemption(TCB_t* tcb);
 void execute_preemption(TCB_t* tcb);
 void remove_executing();
-TCB_t* get_highest_priority_tcb();
+
+TCB_t* get_highest_priority_ready_tcb();
+TCB_t* get_highest_priority_blocked_tcb(PFILA2 queue);
 TCB_t* get_tcb(int tid);
 
 
