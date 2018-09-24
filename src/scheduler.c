@@ -138,3 +138,9 @@ TCB_t* get_highest_priority_tcb()
 
 	return tcb;
 }
+
+TCB_t* get_tcb(int tid)
+{
+
+
+}

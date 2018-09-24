@@ -27,6 +27,7 @@ void check_preemption(TCB_t* tcb);
 void execute_preemption(TCB_t* tcb);
 void remove_executing();
 TCB_t* get_highest_priority_tcb();
+TCB_t* get_tcb(int tid);
 
 
 

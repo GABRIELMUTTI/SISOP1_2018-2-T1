@@ -24,7 +24,24 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 }
 
 int csetprio(int tid, int prio) {
-	return -1;
+
+	FirstFila2(executingQueue);
+	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
+
+	int oldPrio = executing->prio;
+	executing->prio = prio;
+
+	if (oldPrio > prio)
+	{
+		TCB_t* highestPriorityTcb = get_highest_priority_tcb();
+
+		if (highestPriorityTcb != NULL && highestPriorityTcb->prio > prio)
+		{
+			execute_preemption(highestPriorityTcb);
+		}
+	}
+
+	return 0;
 }
 
 int cyield(void) {
@@ -34,6 +51,8 @@ int cyield(void) {
 	put_ready(executing);
 
 	swapcontext(&executing->context, &get_scheduler()->context);
+
+	return 0;
 }
 
 int cjoin(int tid) {
