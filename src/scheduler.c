@@ -84,6 +84,8 @@ void put_ready(TCB_t* tcb)
 		}
 
 	tcb->state = PROCST_APTO;
+
+	check_preemption(tcb);
 }
 
 void check_preemption(TCB_t* tcb)
