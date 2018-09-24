@@ -1,6 +1,8 @@
 #ifndef	__SCHEDULER_H__
 #define	__SCHEDULER_H__
 
+#define NULL 0
+
 #include "../include/cdata.h"
 #include "../include/support.h"
 
@@ -23,6 +25,7 @@ void schedule();
 void put_ready(TCB_t* tcb);
 void check_preemption(TCB_t* tcb);
 void execute_preemption(TCB_t* tcb);
+void remove_executing();
 TCB_t* get_highest_priority_tcb();
 
 

@@ -18,10 +18,16 @@ void schedule()
 
     TCB_t* highestPriorityTcb = get_highest_priority_tcb();
 
-	if (highestPriorityTcb != 0)
+	if (highestPriorityTcb != NULL)
 	{
 		execute_preemption(highestPriorityTcb);
 	}
+}
+
+void remove_executing()
+{
+	FirstFila2(executingQueue);
+	DeleteAtIteratorFila2(executingQueue);
 }
 
 TCB_t* get_scheduler()
@@ -106,7 +112,7 @@ void execute_preemption(TCB_t* tcb)
 
 TCB_t* get_highest_priority_tcb()
 {
-	TCB_t* tcb = 0;
+	TCB_t* tcb = NULL;
 	
 	// If queue is not empty and no errors occured:
 	int queueStatus = FirstFila2(ready0Queue);

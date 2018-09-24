@@ -28,7 +28,10 @@ int csetprio(int tid, int prio) {
 }
 
 int cyield(void) {
-	return -1;
+	FirstFila2(executingQueue);
+	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
+
+	swapcontext(&executing->context, &get_scheduler()->context);
 }
 
 int cjoin(int tid) {
