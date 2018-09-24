@@ -7,7 +7,7 @@
 #include "../include/support.h"
 #include "../include/cthread.h"
 
-int first_time;
+int first_time = 1;
 const int STACK_SIZE = 8192;
 
 PFILA2 ready0Queue;

@@ -89,6 +89,7 @@ void put_ready(TCB_t* tcb)
 		}
 
 	tcb->state = PROCST_APTO;
+
 }
 
 void put_blocked(TCB_t* tcb, PFILA2 blockedQueue)
