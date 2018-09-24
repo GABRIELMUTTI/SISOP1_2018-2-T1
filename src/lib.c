@@ -4,24 +4,13 @@
 #include "../include/support.h"
 #include "../include/cthread.h"
 #include "../include/cdata.h"
-#include "../include/scheduler.h"
 
 
 int ccreate (void* (*start)(void*), void *arg, int prio) {
-	TCB_t* newTcb;
-	if(first_time)
-	{
-		first_time = 0;
-		initialize_scheduler_main();
-	}
-	newTcb = create_tcb(start,arg,prio);
-	put_ready(newTcb);
-
-	return newTcb->tid;
+	return -1;
 }
 
 int csetprio(int tid, int prio) {
-
 	return -1;
 }
 
