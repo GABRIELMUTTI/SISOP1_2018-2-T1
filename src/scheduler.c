@@ -156,13 +156,13 @@ TCB_t* get_highest_priority_ready_tcb()
 TCB_t* get_highest_priority_blocked_tcb(PFILA2 queue)
 {
 	TCB_t* tcb;
-	tcb = (TCB_t*)get_element_of_priority(queue, 0);
+	tcb = get_element_of_priority(queue, 0);
 
 	if(tcb == NULL)
-		tcb = (TCB_t*)get_element_of_priority(queue, 1);
+		tcb = get_element_of_priority(queue, 1);
 	
 	if(tcb == NULL)
-		tcb = (TCB_t*)get_element_of_priority(queue, 2);
+		tcb = get_element_of_priority(queue, 2);
 	
 	
 	
