@@ -35,6 +35,7 @@ void remove_executing();
 
 TCB_t* get_highest_priority_ready_tcb();
 TCB_t* get_highest_priority_blocked_tcb(PFILA2 queue);
+TCB_t* get_element_of_priority(PFILA2 queue, int prio);
 TCB_t* get_tcb(int tid);
 
 

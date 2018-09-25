@@ -155,5 +155,34 @@ TCB_t* get_highest_priority_ready_tcb()
 
 TCB_t* get_highest_priority_blocked_tcb(PFILA2 queue)
 {
-	// FALTA IMPLEMENTAR.
+	TCB_t* tcb;
+	tcb = get_element_of_priority(queue, 0);
+	if(tcb == NULL)
+		tcb = get_element_of_priority(queue, 1);
+	
+	if(tcb == NULL)
+		tcb = get_element_of_priority(queue, 2);
+	
+	return tcb;
+}
+
+TCB_t* get_element_of_priority(PFILA2 queue, int prio)
+{
+	if(FirstFila2(queue) != 0) //queue empty
+		return NULL;
+
+	TCB_t* tcb;
+	tcb = GetAtIteratorFila2(queue);
+
+	if(tcb -> prio == prio)
+		return tcb;
+	else
+		while(NextFila2 != NXTFILA_ENDQUEUE)
+			{
+				tcb = GetAtIteratorFila2(queue);
+				if(tcb -> prio == prio)
+					return tcb;
+			}
+
+	return NULL; //no element of prio in queue
 }
