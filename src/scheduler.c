@@ -138,7 +138,19 @@ TCB_t* get_next_ready_tcb()
 
 TCB_t* get_highest_priority_ready_tcb()
 {
-	// FALTA IMPLEMENTAR.
+	
+	
+	
+	if(FirstFila2(ready0Queue) == 0) //Queue not empty
+		return GetAtIteratorFila2(ready0Queue);
+	else
+		if(FirstFila2(ready1Queue) == 0)
+			return GetAtIteratorFila2(ready1Queue);
+		else
+			if(FirstFila2(ready2Queue == 0))
+				return GetAtIteratorFila2(ready2Queue);
+
+	return NULL;
 }
 
 TCB_t* get_highest_priority_blocked_tcb(PFILA2 queue)
