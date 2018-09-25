@@ -142,13 +142,13 @@ TCB_t* get_highest_priority_ready_tcb()
 	
 	
 	if(FirstFila2(ready0Queue) == 0) //Queue not empty
-		return GetAtIteratorFila2(ready0Queue);
+		return (TCB_t*)GetAtIteratorFila2(ready0Queue);
 	else
 		if(FirstFila2(ready1Queue) == 0)
-			return GetAtIteratorFila2(ready1Queue);
+			return (TCB_t*)GetAtIteratorFila2(ready1Queue);
 		else
 			if(FirstFila2(ready2Queue == 0))
-				return GetAtIteratorFila2(ready2Queue);
+				return (TCB_t*)GetAtIteratorFila2(ready2Queue);
 
 	return NULL;
 }
@@ -156,12 +156,16 @@ TCB_t* get_highest_priority_ready_tcb()
 TCB_t* get_highest_priority_blocked_tcb(PFILA2 queue)
 {
 	TCB_t* tcb;
-	tcb = get_element_of_priority(queue, 0);
+	tcb = (TCB_t*)get_element_of_priority(queue, 0);
+
 	if(tcb == NULL)
-		tcb = get_element_of_priority(queue, 1);
+		tcb = (TCB_t*)get_element_of_priority(queue, 1);
 	
 	if(tcb == NULL)
-		tcb = get_element_of_priority(queue, 2);
+		tcb = (TCB_t*)get_element_of_priority(queue, 2);
+	
+	
+	
 	
 	return tcb;
 }
@@ -172,14 +176,14 @@ TCB_t* get_element_of_priority(PFILA2 queue, int prio)
 		return NULL;
 
 	TCB_t* tcb;
-	tcb = GetAtIteratorFila2(queue);
+	tcb = (TCB_t*)GetAtIteratorFila2(queue);
 
 	if(tcb -> prio == prio)
 		return tcb;
 	else
 		while(NextFila2 != NXTFILA_ENDQUEUE)
 			{
-				tcb = GetAtIteratorFila2(queue);
+				tcb = (TCB_t*)GetAtIteratorFila2(queue);
 				if(tcb -> prio == prio)
 					return tcb;
 			}
