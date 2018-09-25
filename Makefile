@@ -18,7 +18,7 @@ SRC_DIR=./src
 
 all: regra1 regra2 regran
 
-regra1: $(SRC_DIR)/lib.c $(INC_DIR)/scheduler.c
+regra1: $(SRC_DIR)/lib.c $(SRC_DIR)/scheduler.c
 	$(CC) -o $(BIN_DIR)regra1 $(SRC_DIR)/lib.c $(SRC_DIR)/scheduler.c -Wall
 
 regra2: #dependências para a regra2
@@ -28,6 +28,6 @@ regran: #dependências para a regran
 	$(CC) -o $(BIN_DIR)regran $(SRC_DIR)regran.c -Wall
 
 clean:
-	rm -rf $(LIB_DIR)/*.a $(BIN_DIR)/*.o $(SRC_DIR)/*~ $(INC_DIR)/*~ *~
+	rm -rf $(LIB_DIR)/*.a $(BIN_DIR)/*.o $(SRC_DIR)/*~ $(INC_DIR)/*~ *~ 
 
 

@@ -34,7 +34,7 @@ int csetprio(int tid, int prio) {
 
 	if (oldPrio > prio)
 	{
-		TCB_t* highestPriorityTcb = get_highest_priority_tcb();
+		TCB_t* highestPriorityTcb = get_highest_priority_ready_tcb();
 
 		if (highestPriorityTcb != NULL && highestPriorityTcb->prio > prio)
 		{
@@ -100,7 +100,7 @@ int csignal(csem_t *sem) {
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 
-	TCB_t* blockedTcb = get_highest_priority_tcb(sem->fila);
+	TCB_t* blockedTcb = get_highest_priority_blocked_tcb(sem->fila);
 
 	put_ready(blockedTcb);
 

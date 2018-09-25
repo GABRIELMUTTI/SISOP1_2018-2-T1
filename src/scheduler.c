@@ -11,7 +11,7 @@ void initialize_scheduler_main() {
 
 void schedule()
 {
-	TCB_t* highestPriorityTcb = get_next_ready_tcb();
+	TCB_t* highestPriorityTcb = get_highest_priority_ready_tcb();
 
 	while (highestPriorityTcb != NULL)
 	{
@@ -25,7 +25,7 @@ void schedule()
 			execute_preemption(highestPriorityTcb);
 		}
 
-		highestPriorityTcb = get_next_ready_tcb();
+		highestPriorityTcb = get_highest_priority_ready_tcb();
 	}
 }
 
@@ -94,7 +94,7 @@ void put_ready(TCB_t* tcb)
 
 void put_blocked(TCB_t* tcb, PFILA2 blockedQueue)
 {
-	AppendFila2(tcb, blockedQueue);
+	AppendFila2(blockedQueue, tcb);
 	tcb->state = PROCST_BLOQ;
 }
 
@@ -122,19 +122,7 @@ void execute_preemption(TCB_t* tcb)
 	swapcontext(&executing->context, &tcb->context);
 }
 
-TCB_t* get_next_ready_tcb()
-{
-	TCB_t* tcb;
-	
-	tcb = get_highest_priority_tcb(ready0Queue);
-	if (tcb != NULL) { return tcb; }
 
-	tcb = get_highest_priority_tcb(ready1Queue);
-	if (tcb != NULL) { return tcb; }
-
-	tcb = get_highest_priority_tcb(ready2Queue);
-	return tcb;
-}
 
 TCB_t* get_highest_priority_ready_tcb()
 {
@@ -147,7 +135,7 @@ TCB_t* get_highest_priority_ready_tcb()
 		if(FirstFila2(ready1Queue) == 0)
 			return (TCB_t*)GetAtIteratorFila2(ready1Queue);
 		else
-			if(FirstFila2(ready2Queue == 0))
+			if(FirstFila2(ready2Queue) == 0)
 				return (TCB_t*)GetAtIteratorFila2(ready2Queue);
 
 	return NULL;
@@ -181,7 +169,7 @@ TCB_t* get_element_of_priority(PFILA2 queue, int prio)
 	if(tcb -> prio == prio)
 		return tcb;
 	else
-		while(NextFila2 != NXTFILA_ENDQUEUE)
+		while(NextFila2(queue) != NXTFILA_ENDQUEUE)
 			{
 				tcb = (TCB_t*)GetAtIteratorFila2(queue);
 				if(tcb -> prio == prio)
