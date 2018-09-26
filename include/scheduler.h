@@ -6,6 +6,7 @@
 #include "../include/cdata.h"
 #include "../include/support.h"
 #include "../include/cthread.h"
+#include <stdlib.h>
 
 int first_time = 1;
 const int STACK_SIZE = 8192;
