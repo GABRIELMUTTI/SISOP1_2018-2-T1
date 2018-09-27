@@ -15,19 +15,25 @@ LIB_DIR=./lib
 INC_DIR=./include
 BIN_DIR=./bin
 SRC_DIR=./src
- 
+
+
 
 compilacao: $(SRC_DIR)/lib.c $(SRC_DIR)/scheduler.c
 	$(CC) -c  $(SRC_DIR)/lib.c -o $(BIN_DIR)/lib.o  -Wall
 	$(CC) -c  $(SRC_DIR)/scheduler.c -o $(BIN_DIR)/scheduler.o  -Wall
 
 ligacao: $(BIN_DIR)/lib.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
-	ar crs cthread.a $(BIN_DIR)/lib.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
+	ar crs $(LIB_DIR)/cthread.a $(BIN_DIR)/lib.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
 
 #regran: #dependências para a regran
 #	$(CC) -o $(BIN_DIR)regran $(SRC_DIR)regran.c -Wall
 
 clean: #precisa nao removesupport.o
-	rm -rf $(LIB_DIR)/*.a $(BIN_DIR)/*.o $(SRC_DIR)/*~ $(INC_DIR)/*~ *~ 
+	rm -rf $(LIB_DIR)/*.a
+	ln $(BIN_DIR)/support.o ./
+	rm -rf $(BIN_DIR)
+	mkdir -p $(BIN_DIR)
+	mv support.o $(BIN_DIR)/
+	
 
 
