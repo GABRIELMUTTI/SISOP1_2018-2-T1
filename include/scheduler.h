@@ -17,7 +17,6 @@ PFILA2 ready2Queue;
 PFILA2 executingQueue;
 
 PFILA2 blockedQueue;
-PFILA2 semQueues;
 
 PFILA2 tcbs;
 PFILA2 sems;

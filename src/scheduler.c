@@ -7,19 +7,32 @@ void initialize_scheduler_main() {
 	
     // Create scheduler's TCB.
 	create_tcb(&schedule, 0, 0);
+
+	CreateFila2(ready0Queue);
+	CreateFila2(ready1Queue);
+	CreateFila2(ready2Queue);
+	CreateFila2(blockedQueue);
+	CreateFila2(executingQueue);
+	CreateFila2(tcbs);
+	CreateFila2(sems);
 }
 
 void schedule()
 {
 	TCB_t* highestPriorityTcb = get_highest_priority_ready_tcb();
+	TCB_t* scheduler = get_scheduler();
 
 	while (highestPriorityTcb != NULL)
 	{
-		remove_executing();
+		if (scheduler->state != PROCST_EXEC)
+		{
+			remove_executing();
 
-		// Puts scheduler TCB in executing queue.
-		AppendFila2(executingQueue, get_scheduler());
-
+			// Puts scheduler TCB in executing queue.
+			AppendFila2(executingQueue, get_scheduler());
+			get_scheduler()->state = PROCST_EXEC;
+		}
+		
 		if (highestPriorityTcb != NULL)
 		{
 			execute_preemption(highestPriorityTcb);
@@ -118,6 +131,7 @@ void execute_preemption(TCB_t* tcb)
 	put_ready(executing);
 
 	AppendFila2(executingQueue, tcb);
+	tcb->state = PROCST_EXEC;
 
 	swapcontext(&executing->context, &tcb->context);
 }
