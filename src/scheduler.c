@@ -5,21 +5,34 @@ const int STACK_SIZE = 8192;
 
 void initialize_scheduler_main() 
 {
-	CreateFila2(ready0Queue);
-	CreateFila2(ready1Queue);
-	CreateFila2(ready2Queue);
-	CreateFila2(blockedQueue);
-	CreateFila2(executingQueue);
-	CreateFila2(tcbs);
-	CreateFila2(sems);
-
+	ready0Queue = create_queue();
+	ready1Queue = create_queue();
+	ready2Queue = create_queue();
+	blockedQueue = create_queue();
+	executingQueue = create_queue();
+	tcbs = create_queue();
+	sems = create_queue();
+	
     // Create main's TCB.
 	create_main_tcb();
-	printf("yeahmaintcb\n");
+	
     // Create scheduler's TCB.
 	create_tcb(&schedule, 0, 0);
-	printf("yeahscheduletcb\n");
+	
 
+}
+
+PFILA2 create_queue()
+{
+	PFILA2 queue = (PFILA2)malloc(sizeof(FILA2));
+	int error = CreateFila2(queue);
+	if (error != 0)
+	{
+		printf("Error in queue creation.\n");
+		return NULL;
+	}
+
+	return queue;
 }
 
 void schedule()
