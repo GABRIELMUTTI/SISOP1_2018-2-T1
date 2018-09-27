@@ -18,8 +18,6 @@ void initialize_scheduler_main()
 	
     // Create scheduler's TCB.
 	create_tcb(&schedule, 0, 0);
-	
-
 }
 
 PFILA2 create_queue()
@@ -76,17 +74,19 @@ TCB_t* get_scheduler()
 
 TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
 {
+	
 	// Allocates stack and TCB.
-	char stack[STACK_SIZE];
+	char* stack = malloc(sizeof(char) * STACK_SIZE);
 	TCB_t* newTcb = (TCB_t*)malloc(sizeof(TCB_t));
-
+	
 	// Sets up the context.
 	getcontext(&newTcb->context);
 	newTcb->context.uc_link = &get_scheduler()->context;
 	newTcb->context.uc_stack.ss_sp = stack;
-	newTcb->context.uc_stack.ss_size = sizeof(stack);
-	makecontext(&newTcb->context, start, arg);
-
+	newTcb->context.uc_stack.ss_size = STACK_SIZE;
+	
+	makecontext(&newTcb->context, start, 1, arg);		
+	
 	// Put new TCB in the TCB list.
 	AppendFila2(tcbs, newTcb);
 	
@@ -95,13 +95,10 @@ TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
 
 TCB_t* create_main_tcb()
 {
-	printf("premalloc\n");
 	TCB_t* mainTcb = (TCB_t*)malloc(sizeof(TCB_t));
 	
 	getcontext(&mainTcb->context);
-	printf("Getcontext1\n");
 	AppendFila2(tcbs, mainTcb);
-	printf("Getcontext\n");
 	return mainTcb;
 }
 
@@ -109,7 +106,7 @@ void put_ready(TCB_t* tcb)
 {
 	switch(tcb->prio)
 		{ 
-			case 0:
+		case 0:
                 AppendFila2(ready0Queue, tcb);
                 break;
 			case 1:

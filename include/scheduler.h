@@ -30,6 +30,7 @@ void put_blocked(TCB_t* tcb, PFILA2 blockedQueue);
 void check_preemption(TCB_t* tcb);
 void execute_preemption(TCB_t* tcb);
 void remove_executing();
+PFILA2 create_queue();
 
 TCB_t* get_highest_priority_ready_tcb();
 TCB_t* get_highest_priority_blocked_tcb(PFILA2 queue);
