@@ -1,0 +1,4 @@
+make all
+cd exemplos
+make exemplo
+./exemplo
