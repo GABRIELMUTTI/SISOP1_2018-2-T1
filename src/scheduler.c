@@ -1,5 +1,8 @@
 #include "../include/scheduler.h"
 
+int first_time = 1;
+const int STACK_SIZE = 8192;
+
 void initialize_scheduler_main() {
 
     // Create main's TCB.

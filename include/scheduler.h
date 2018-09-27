@@ -1,15 +1,13 @@
 #ifndef	__SCHEDULER_H__
 #define	__SCHEDULER_H__
 
-#define NULL 0
-
 #include "../include/cdata.h"
 #include "../include/support.h"
 #include "../include/cthread.h"
 #include <stdlib.h>
 
-int first_time = 1;
-const int STACK_SIZE = 8192;
+extern int first_time;
+extern const int STACK_SIZE;
 
 PFILA2 ready0Queue;
 PFILA2 ready1Queue;

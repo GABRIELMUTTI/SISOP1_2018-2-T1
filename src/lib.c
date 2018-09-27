@@ -6,8 +6,6 @@
 #include "../include/cdata.h"
 #include "../include/scheduler.h"
 
-extern int first_time;
-
 int ccreate (void* (*start)(void*), void *arg, int prio) {
 
 	if (first_time)
