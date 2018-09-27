@@ -16,8 +16,10 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 	}
 	
 	TCB_t* newTcb = create_tcb(start, arg, prio);
-	put_ready(newTcb); 
+	put_ready(newTcb);
+
 	check_preemption(newTcb);
+
 
 	return newTcb->tid;
 }

@@ -99,6 +99,8 @@ TCB_t* create_main_tcb()
 	
 	getcontext(&mainTcb->context);
 	AppendFila2(tcbs, mainTcb);
+	AppendFila2(executingQueue, mainTcb);
+
 	return mainTcb;
 }
 
@@ -131,10 +133,12 @@ void check_preemption(TCB_t* tcb)
 {
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
+		
 	if(executing->prio < tcb->prio)
-    {
-        execute_preemption(tcb);
-    }
+    	{
+		
+        	execute_preemption(tcb);
+    	}
 }
 
 
