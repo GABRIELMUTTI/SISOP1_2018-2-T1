@@ -23,6 +23,7 @@ compilacao: $(SRC_DIR)/lib.c $(SRC_DIR)/scheduler.c
 	$(CC) -c  $(SRC_DIR)/scheduler.c -o $(BIN_DIR)/scheduler.o  -Wall
 
 ligacao: $(BIN_DIR)/lib.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
+	mkdir -p lib	
 	ar crs $(LIB_DIR)/cthread.a $(BIN_DIR)/lib.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
 
 #regran: #dependências para a regran
