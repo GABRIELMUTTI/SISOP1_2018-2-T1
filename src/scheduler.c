@@ -7,6 +7,14 @@ void initialize_scheduler_main() {
 	
     // Create scheduler's TCB.
 	create_tcb(&schedule, 0, 0);
+
+	CreateFila2(ready0Queue);
+	CreateFila2(ready1Queue);
+	CreateFila2(ready2Queue);
+	CreateFila2(blockedQueue);
+	CreateFila2(executingQueue);
+	CreateFila2(tcbs);
+	CreateFila2(sems);
 }
 
 void schedule()
