@@ -36,37 +36,48 @@ PFILA2 create_queue()
 
 void schedule()
 {	
-	printf("*** SCHEDULING (FIRST TIME) ***\n\n");
+	DEBUG_PRINT("*** SCHEDULING (FIRST TIME) ***\n\n", 0);
+	
+	on_thread_end();
 	TCB_t* highestPriorityTcb = get_highest_priority_ready_tcb();
+	
 
+	
 	while (highestPriorityTcb != NULL)
 	{	
-		printf("*** SCHEDULING:\n\t tid: %d,\tprio: %d ***\n\n", highestPriorityTcb->tid, highestPriorityTcb->prio);
+		DEBUG_PRINT("*** SCHEDULING:\n\t tid: %d,\tprio: %d ***\n\n", highestPriorityTcb->tid, highestPriorityTcb->prio);
 
-		// If executing thread ended.
-		if (FirstFila2(executingQueue) == 0)
-		{
-			FirstFila2(executingQueue);
-			TCB_t* finished_tcb = (TCB_t*)GetAtIteratorFila2(executingQueue);
 
-			deblock_threads();
-			remove_executing();
-
-			remove_tcb(finished_tcb);
-			
-		}
+		
 		
 		if (highestPriorityTcb != NULL)
 		{
 			execute_preemption(highestPriorityTcb);
 		}
-		
+
+		on_thread_end();
 		highestPriorityTcb = get_highest_priority_ready_tcb();
+		
 	}
 		
 		
 	
 	
+}
+
+void on_thread_end()
+{
+	// If executing thread ended.
+	if (FirstFila2(executingQueue) == 0)
+	{
+		FirstFila2(executingQueue);
+		TCB_t* finished_tcb = (TCB_t*)GetAtIteratorFila2(executingQueue);
+
+		deblock_threads();
+		remove_executing();
+
+		remove_tcb(finished_tcb);
+	}
 }
 
 void remove_tcb(TCB_t* tcb)
@@ -80,6 +91,9 @@ void remove_tcb(TCB_t* tcb)
 		{
 			DeleteAtIteratorFila2(tcbs);
 			found = 1;
+			num_tcbs = num_tcbs - 1;
+			free(current_tcb->data);
+			free(current_tcb);
 		}
 
 		end = NextFila2(tcbs);
@@ -88,13 +102,11 @@ void remove_tcb(TCB_t* tcb)
 
 void deblock_threads()
 {
-
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 	
 	int end = FirstFila2(blockedQueue);
 	int found_blocked = 0;
-	printf("end: %d\n", end);
 	while (!end && !found_blocked)
 	{
 		
@@ -105,7 +117,7 @@ void deblock_threads()
 			DeleteAtIteratorFila2(blockedQueue);
 			found_blocked = 1;
 
-			//printf("*** DEBLOCKING:\n\t tid: %d,\tprio: %d ***\n\n", blocked_tcb->tid, blocked_tcb->prio);
+			DEBUG_PRINT("*** DEBLOCKING:\n\t tid: %d,\tprio: %d ***\n\n", blocked_tcb->tid, blocked_tcb->prio);
 		}
 
 		end = NextFila2(blockedQueue);
@@ -221,7 +233,7 @@ void put_ready(TCB_t* tcb)
 {
 	
 	if(tcb->prio == 1)
-		printf("Botei %d\n",tcb->prio);
+		DEBUG_PRINT("Botei %d\n",tcb->prio);
 
 	switch(tcb->prio)
 		{ 
@@ -305,7 +317,7 @@ void execute_preemption(TCB_t* tcb)
 
 	if (FirstFila2(executingQueue) == 0)
 	{
-		printf("*** EXECUTING_PREEMPTION:\n\t tid: %d,\tprio: %d ***\n\n", tcb->tid, tcb->prio);
+		DEBUG_PRINT("*** EXECUTING_PREEMPTION:\n\t tid: %d,\tprio: %d ***\n\n", tcb->tid, tcb->prio);
 		TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 		DeleteAtIteratorFila2(executingQueue);
 		put_ready(executing);
@@ -317,7 +329,7 @@ void execute_preemption(TCB_t* tcb)
 	}
 	else
 	{
-		printf("*** PUTTING IN EXECUTION:\n\t tid: %d,\tprio: %d ***\n\n", tcb->tid, tcb->prio);
+		DEBUG_PRINT("*** PUTTING IN EXECUTION:\n\t tid: %d,\tprio: %d ***\n\n", tcb->tid, tcb->prio);
 		AppendFila2(executingQueue, tcb);
 		tcb->state = PROCST_EXEC;
 		

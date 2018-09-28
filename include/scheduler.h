@@ -1,6 +1,12 @@
 #ifndef	__SCHEDULER_H__
 #define	__SCHEDULER_H__
 
+#define DEBUG 0
+
+#define DEBUG_PRINT(str, ...) \
+	if (DEBUG) { printf(str, __VA_ARGS__); }
+
+
 #include "../include/cdata.h"
 #include "../include/support.h"
 #include "../include/cthread.h"
@@ -42,6 +48,7 @@ void execute_preemption(TCB_t* tcb);
 void remove_executing();
 PFILA2 create_queue();
 int tcb_exists(int tid);
+void on_thread_end();
 
 TCB_t* get_highest_priority_ready_tcb();
 TCB_t* get_highest_priority_blocked_tcb(PFILA2 queue);

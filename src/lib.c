@@ -16,11 +16,11 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 	}
 	
 	TCB_t* newTcb = create_tcb(start, arg, prio);
-	printf("*** CCREATE:\n\t tid: %d,\tprio: %d ***\n\n", newTcb->tid, newTcb->prio);
+	DEBUG_PRINT("*** CCREATE:\n\t tid: %d,\tprio: %d ***\n\n", newTcb->tid, newTcb->prio);
 	
 	put_ready(newTcb);
 
-	check_preemption(newTcb);
+	//check_preemption(newTcb);
 
 	return newTcb->tid;
 }
@@ -47,18 +47,19 @@ int csetprio(int tid, int prio) {
 }
 
 int cyield(void) {
+	
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
-
+	DEBUG_PRINT("*** CYIELD:\n\t tid: %d\n\n", executing->tid);
 	put_ready(executing);
-
+	remove_executing();
 	swapcontext(&executing->context, &get_scheduler()->context);
 
 	return 0;
 }
 
 int cjoin(int tid) {
-	printf("*** CJOIN:\n\t tid: %d\n\n", tid);
+	DEBUG_PRINT("*** CJOIN:\n\t tid: %d\n\n", tid);
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 
