@@ -2,6 +2,7 @@
 
 int first_time = 1;
 const int STACK_SIZE = 8192;
+int num_tcbs = 0;
 
 void initialize_scheduler_main() 
 {
@@ -29,32 +30,37 @@ PFILA2 create_queue()
 		printf("Error in queue creation.\n");
 		return NULL;
 	}
-
+	
 	return queue;
 }
 
 void schedule()
-{
+{	
+	printf("*** SCHEDULING (FIRST TIME) ***\n\n");
 	TCB_t* highestPriorityTcb = get_highest_priority_ready_tcb();
-	TCB_t* scheduler = get_scheduler();
 
-	while (highestPriorityTcb != NULL )
-	{
-		if (scheduler->state != PROCST_EXEC)
+	while (highestPriorityTcb != NULL)
+	{	
+		printf("*** SCHEDULING:\n\t tid: %d,\tprio: %d ***\n\n", highestPriorityTcb->tid, highestPriorityTcb->prio);
+
+		// If executing thread ended.
+		if (FirstFila2(executingQueue) == 0)
 		{
+			FirstFila2(executingQueue);
+			TCB_t* finished_tcb = (TCB_t*)GetAtIteratorFila2(executingQueue);
+
+			deblock_threads();
 			remove_executing();
 
-			// Puts scheduler TCB in executing queue.
-			AppendFila2(executingQueue, get_scheduler());
-			get_scheduler()->state = PROCST_EXEC;
+			remove_tcb(finished_tcb);
+			
 		}
 		
-		if (highestPriorityTcb != NULL && highestPriorityTcb->tid != 1 )
+		if (highestPriorityTcb != NULL)
 		{
 			execute_preemption(highestPriorityTcb);
 		}
-		else break;
-			
+		
 		highestPriorityTcb = get_highest_priority_ready_tcb();
 	}
 		
@@ -63,10 +69,75 @@ void schedule()
 	
 }
 
+void remove_tcb(TCB_t* tcb)
+{
+	int end = FirstFila2(tcbs);
+	int found = 0;
+	while (!end && !found)
+	{
+		TCB_t* current_tcb = (TCB_t*)GetAtIteratorFila2(tcbs);
+		if (current_tcb->tid == tcb->tid)
+		{
+			DeleteAtIteratorFila2(tcbs);
+			found = 1;
+		}
+
+		end = NextFila2(tcbs);
+	}	
+}
+
+void deblock_threads()
+{
+
+	FirstFila2(executingQueue);
+	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
+	
+	int end = FirstFila2(blockedQueue);
+	int found_blocked = 0;
+	printf("end: %d\n", end);
+	while (!end && !found_blocked)
+	{
+		
+		TCB_t* blocked_tcb = (TCB_t*)GetAtIteratorFila2(blockedQueue);
+		if (((TCB_data_t*)blocked_tcb->data)->tid_joined == executing->tid)
+		{
+			put_ready(blocked_tcb);
+			DeleteAtIteratorFila2(blockedQueue);
+			found_blocked = 1;
+
+			//printf("*** DEBLOCKING:\n\t tid: %d,\tprio: %d ***\n\n", blocked_tcb->tid, blocked_tcb->prio);
+		}
+
+		end = NextFila2(blockedQueue);
+	}
+}
+
 void remove_executing()
 {
 	FirstFila2(executingQueue);
 	DeleteAtIteratorFila2(executingQueue);
+}
+
+void remove_highest_priority_ready_tcb()
+{
+	if(FirstFila2(ready0Queue) == 0)
+	{
+		DeleteAtIteratorFila2(ready0Queue);
+	}	
+	else
+	{
+		if(FirstFila2(ready1Queue) == 0)
+		{
+			DeleteAtIteratorFila2(ready1Queue);
+		}		
+		else
+		{
+			if(FirstFila2(ready2Queue) == 0)
+			{
+				DeleteAtIteratorFila2(ready2Queue);
+			}		
+		}
+	}
 }
 
 TCB_t* get_scheduler()
@@ -90,6 +161,9 @@ TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
 	char* stack = malloc(sizeof(char) * STACK_SIZE);
 	TCB_t* newTcb = (TCB_t*)malloc(sizeof(TCB_t));
 	newTcb->prio = prio;
+	newTcb->tid = num_tcbs;
+	newTcb->data = malloc(sizeof(TCB_data_t));
+	num_tcbs = num_tcbs + 1;
 	// Sets up the context.
 	getcontext(&newTcb->context);
 	newTcb->context.uc_link = &get_scheduler()->context;
@@ -112,6 +186,8 @@ TCB_t* create_scheduler_tcb(void* (*start)(void*), void *arg, int prio)
 	TCB_t* newTcb = (TCB_t*)malloc(sizeof(TCB_t));
 	newTcb->prio = prio;
 	newTcb->tid = 1;
+	newTcb->data = malloc(sizeof(TCB_data_t));
+	num_tcbs = num_tcbs + 1;
 	// Sets up the context.
 	getcontext(&newTcb->context);
 	newTcb->context.uc_link = &get_main()->context;
@@ -130,6 +206,9 @@ TCB_t* create_main_tcb()
 {
 	TCB_t* mainTcb = (TCB_t*)malloc(sizeof(TCB_t));
 	mainTcb->prio = 2;
+	mainTcb->tid = 0;
+	mainTcb->data = malloc(sizeof(TCB_data_t));
+	num_tcbs = num_tcbs + 1;
 	getcontext(&mainTcb->context);
 	AppendFila2(tcbs, mainTcb);
 	AppendFila2(executingQueue, mainTcb);
@@ -161,10 +240,51 @@ void put_ready(TCB_t* tcb)
 
 }
 
-void put_blocked(TCB_t* tcb, PFILA2 blockedQueue)
+int tcb_exists(int tid)
 {
-	AppendFila2(blockedQueue, tcb);
-	tcb->state = PROCST_BLOQ;
+	
+	int end = FirstFila2(tcbs);
+	while (!end)
+	{
+		TCB_t* tcb = (TCB_t*)GetAtIteratorFila2(tcbs);
+		if (tcb->tid == tid)
+		{
+			return 1;
+		}
+
+		end = NextFila2(tcbs);
+	}
+
+	return 0;
+}
+
+int exists_blocked_thread(int tid)
+{
+	int end = FirstFila2(blockedQueue);
+
+	while (!end)
+	{
+		TCB_t* blocked_tcb = (TCB_t*)GetAtIteratorFila2(blockedQueue);
+		if (((TCB_data_t*)blocked_tcb->data)->tid_joined == tid)
+		{
+			return 1;
+		}
+
+		end = NextFila2(blockedQueue);
+	}
+
+	return 0;
+}
+
+void put_blocked(PFILA2 queue)
+{
+	FirstFila2(executingQueue);
+	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
+
+	AppendFila2(queue, executing);
+	executing->state = PROCST_BLOQ;
+
+	remove_executing();
 }
 
 void check_preemption(TCB_t* tcb)
@@ -172,37 +292,37 @@ void check_preemption(TCB_t* tcb)
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 		
-	
-	if(executing->prio < tcb->prio)
-    	{
-		
-		
-        	execute_preemption(tcb);
-    	}
+	if(executing->prio > tcb->prio)
+    {
+        execute_preemption(tcb);
+    }
 }
 
 
 void execute_preemption(TCB_t* tcb)
-{
-	if(FirstFila2(ready0Queue)==0)
-		DeleteAtIteratorFila2(ready0Queue);
+{	
+	remove_highest_priority_ready_tcb();
+
+	if (FirstFila2(executingQueue) == 0)
+	{
+		printf("*** EXECUTING_PREEMPTION:\n\t tid: %d,\tprio: %d ***\n\n", tcb->tid, tcb->prio);
+		TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
+		DeleteAtIteratorFila2(executingQueue);
+		put_ready(executing);
+
+		AppendFila2(executingQueue, tcb);
+		tcb->state = PROCST_EXEC;
+		
+		swapcontext(&executing->context, &tcb->context);
+	}
 	else
-		if(FirstFila2(ready1Queue)==0)
-			DeleteAtIteratorFila2(ready1Queue);
-		else
-			if(FirstFila2(ready2Queue)==0)
-				DeleteAtIteratorFila2(ready2Queue);
-
-	FirstFila2(executingQueue);
-	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
-
-	DeleteAtIteratorFila2(executingQueue);
-	put_ready(executing);
-
-	AppendFila2(executingQueue, tcb);
-	tcb->state = PROCST_EXEC;
-
-	swapcontext(&executing->context, &tcb->context);
+	{
+		printf("*** PUTTING IN EXECUTION:\n\t tid: %d,\tprio: %d ***\n\n", tcb->tid, tcb->prio);
+		AppendFila2(executingQueue, tcb);
+		tcb->state = PROCST_EXEC;
+		
+		swapcontext(&get_scheduler()->context, &tcb->context);
+	}
 }
 
 

@@ -16,11 +16,11 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 	}
 	
 	TCB_t* newTcb = create_tcb(start, arg, prio);
+	printf("*** CCREATE:\n\t tid: %d,\tprio: %d ***\n\n", newTcb->tid, newTcb->prio);
 	
 	put_ready(newTcb);
 
 	check_preemption(newTcb);
-
 
 	return newTcb->tid;
 }
@@ -58,13 +58,21 @@ int cyield(void) {
 }
 
 int cjoin(int tid) {
-	
+	printf("*** CJOIN:\n\t tid: %d\n\n", tid);
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 
-	put_blocked(executing, blockedQueue);
+	if (tcb_exists(tid) && !exists_blocked_thread(tid))
+	{
+		((TCB_data_t*)executing->data)->tid_joined = tid;
+		put_blocked(blockedQueue);
 
-	swapcontext(&executing->context, &get_scheduler()->context);
+		swapcontext(&executing->context, &get_scheduler()->context);
+	}
+	else
+	{
+		return -1;
+	}
 
 	return 0;
 }
@@ -83,7 +91,7 @@ int cwait(csem_t *sem) {
 		FirstFila2(executingQueue);
 		TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 
-		put_blocked(executing, sem->fila);
+		put_blocked(sem->fila);
 
 		swapcontext(&executing->context, &get_scheduler()->context);
 	}
@@ -104,7 +112,7 @@ int csignal(csem_t *sem) {
 	TCB_t* blockedTcb = get_highest_priority_blocked_tcb(sem->fila);
 
 	put_ready(blockedTcb);
-
+	printf("JOIN\n");
 	swapcontext(&executing->context, &get_scheduler()->context);
 
 	return 0;
