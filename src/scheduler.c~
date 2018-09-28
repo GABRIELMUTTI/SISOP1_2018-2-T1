@@ -3,21 +3,34 @@
 int first_time = 1;
 const int STACK_SIZE = 8192;
 
-void initialize_scheduler_main() {
-
+void initialize_scheduler_main() 
+{
+	ready0Queue = create_queue();
+	ready1Queue = create_queue();
+	ready2Queue = create_queue();
+	blockedQueue = create_queue();
+	executingQueue = create_queue();
+	tcbs = create_queue();
+	sems = create_queue();
+	
     // Create main's TCB.
 	create_main_tcb();
-	printf("yeahmaintcb\n");
+	
     // Create scheduler's TCB.
-	create_tcb(&schedule, 0, 0);
-	printf("yeahscheduletcb\n");
-	CreateFila2(ready0Queue);
-	CreateFila2(ready1Queue);
-	CreateFila2(ready2Queue);
-	CreateFila2(blockedQueue);
-	CreateFila2(executingQueue);
-	CreateFila2(tcbs);
-	CreateFila2(sems);
+	create_scheduler_tcb(&schedule, 0, 2);
+}
+
+PFILA2 create_queue()
+{
+	PFILA2 queue = (PFILA2)malloc(sizeof(FILA2));
+	int error = CreateFila2(queue);
+	if (error != 0)
+	{
+		printf("Error in queue creation.\n");
+		return NULL;
+	}
+
+	return queue;
 }
 
 void schedule()
@@ -58,20 +71,49 @@ TCB_t* get_scheduler()
 
 	return (TCB_t*)GetAtIteratorFila2(tcbs);
 }
+TCB_t* get_main()
+{
+	FirstFila2(tcbs);
+
+	return (TCB_t*)GetAtIteratorFila2(tcbs);
+}
 
 TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
 {
+	
 	// Allocates stack and TCB.
-	char stack[STACK_SIZE];
+	char* stack = malloc(sizeof(char) * STACK_SIZE);
 	TCB_t* newTcb = (TCB_t*)malloc(sizeof(TCB_t));
-
+	newTcb->prio = prio;
 	// Sets up the context.
 	getcontext(&newTcb->context);
 	newTcb->context.uc_link = &get_scheduler()->context;
 	newTcb->context.uc_stack.ss_sp = stack;
-	newTcb->context.uc_stack.ss_size = sizeof(stack);
-	makecontext(&newTcb->context, start, arg);
+	newTcb->context.uc_stack.ss_size = STACK_SIZE;
+	
+	makecontext(&newTcb->context, start, 1, arg);		
+	
+	// Put new TCB in the TCB list.
+	AppendFila2(tcbs, newTcb);
+	
+	return newTcb;
+}
 
+TCB_t* create_scheduler_tcb(void* (*start)(void*), void *arg, int prio)
+{
+	
+	// Allocates stack and TCB.
+	char* stack = malloc(sizeof(char) * STACK_SIZE);
+	TCB_t* newTcb = (TCB_t*)malloc(sizeof(TCB_t));
+	newTcb->prio = prio;
+	// Sets up the context.
+	getcontext(&newTcb->context);
+	newTcb->context.uc_link = &get_main()->context;
+	newTcb->context.uc_stack.ss_sp = stack;
+	newTcb->context.uc_stack.ss_size = STACK_SIZE;
+	
+	makecontext(&newTcb->context, start, 1, arg);		
+	
 	// Put new TCB in the TCB list.
 	AppendFila2(tcbs, newTcb);
 	
@@ -80,21 +122,23 @@ TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
 
 TCB_t* create_main_tcb()
 {
-	printf("premalloc\n");
 	TCB_t* mainTcb = (TCB_t*)malloc(sizeof(TCB_t));
-	
+	mainTcb->prio = 1;
 	getcontext(&mainTcb->context);
-	printf("Getcontext1\n");
 	AppendFila2(tcbs, mainTcb);
-	printf("Getcontext\n");
+	AppendFila2(executingQueue, mainTcb);
+
+
 	return mainTcb;
 }
 
 void put_ready(TCB_t* tcb)
 {
+	//printf("Botei %d\n",tcb->prio);
+
 	switch(tcb->prio)
 		{ 
-			case 0:
+		case 0:
                 AppendFila2(ready0Queue, tcb);
                 break;
 			case 1:
@@ -119,15 +163,28 @@ void check_preemption(TCB_t* tcb)
 {
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
+		
+	
 	if(executing->prio < tcb->prio)
-    {
-        execute_preemption(tcb);
-    }
+    	{
+		
+		
+        	execute_preemption(tcb);
+    	}
 }
 
 
 void execute_preemption(TCB_t* tcb)
 {
+	if(FirstFila2(ready0Queue)==0)
+		DeleteAtIteratorFila2(ready0Queue);
+	else
+		if(FirstFila2(ready1Queue)==0)
+			DeleteAtIteratorFila2(ready1Queue);
+		else
+			if(FirstFila2(ready2Queue)==0)
+				DeleteAtIteratorFila2(ready2Queue);
+
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 

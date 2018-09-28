@@ -11,15 +11,16 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 	if (first_time)
 	{
 		first_time = 0;
-		
 		initialize_scheduler_main();
-		printf("yeah\n");
+		
 	}
-
+	
 	TCB_t* newTcb = create_tcb(start, arg, prio);
+	
+	put_ready(newTcb);
 
-	put_ready(newTcb); 
 	check_preemption(newTcb);
+
 
 	return newTcb->tid;
 }

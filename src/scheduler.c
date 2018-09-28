@@ -17,7 +17,7 @@ void initialize_scheduler_main()
 	create_main_tcb();
 	
     // Create scheduler's TCB.
-	create_tcb(&schedule, 0, 0);
+	create_scheduler_tcb(&schedule, 0, 2);
 }
 
 PFILA2 create_queue()
@@ -71,6 +71,12 @@ TCB_t* get_scheduler()
 
 	return (TCB_t*)GetAtIteratorFila2(tcbs);
 }
+TCB_t* get_main()
+{
+	FirstFila2(tcbs);
+
+	return (TCB_t*)GetAtIteratorFila2(tcbs);
+}
 
 TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
 {
@@ -78,7 +84,7 @@ TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
 	// Allocates stack and TCB.
 	char* stack = malloc(sizeof(char) * STACK_SIZE);
 	TCB_t* newTcb = (TCB_t*)malloc(sizeof(TCB_t));
-	
+	newTcb->prio = prio;
 	// Sets up the context.
 	getcontext(&newTcb->context);
 	newTcb->context.uc_link = &get_scheduler()->context;
@@ -93,19 +99,43 @@ TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
 	return newTcb;
 }
 
+TCB_t* create_scheduler_tcb(void* (*start)(void*), void *arg, int prio)
+{
+	
+	// Allocates stack and TCB.
+	char* stack = malloc(sizeof(char) * STACK_SIZE);
+	TCB_t* newTcb = (TCB_t*)malloc(sizeof(TCB_t));
+	newTcb->prio = prio;
+	// Sets up the context.
+	getcontext(&newTcb->context);
+	newTcb->context.uc_link = &get_main()->context;
+	newTcb->context.uc_stack.ss_sp = stack;
+	newTcb->context.uc_stack.ss_size = STACK_SIZE;
+	
+	makecontext(&newTcb->context, start, 1, arg);		
+	
+	// Put new TCB in the TCB list.
+	AppendFila2(tcbs, newTcb);
+	
+	return newTcb;
+}
+
 TCB_t* create_main_tcb()
 {
 	TCB_t* mainTcb = (TCB_t*)malloc(sizeof(TCB_t));
-	
+	mainTcb->prio = 1;
 	getcontext(&mainTcb->context);
 	AppendFila2(tcbs, mainTcb);
 	AppendFila2(executingQueue, mainTcb);
+
 
 	return mainTcb;
 }
 
 void put_ready(TCB_t* tcb)
 {
+	//printf("Botei %d\n",tcb->prio);
+
 	switch(tcb->prio)
 		{ 
 		case 0:
@@ -134,8 +164,10 @@ void check_preemption(TCB_t* tcb)
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 		
+	
 	if(executing->prio < tcb->prio)
     	{
+		
 		
         	execute_preemption(tcb);
     	}
@@ -144,6 +176,15 @@ void check_preemption(TCB_t* tcb)
 
 void execute_preemption(TCB_t* tcb)
 {
+	if(FirstFila2(ready0Queue)==0)
+		DeleteAtIteratorFila2(ready0Queue);
+	else
+		if(FirstFila2(ready1Queue)==0)
+			DeleteAtIteratorFila2(ready1Queue);
+		else
+			if(FirstFila2(ready2Queue)==0)
+				DeleteAtIteratorFila2(ready2Queue);
+
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 
