@@ -38,7 +38,7 @@ void schedule()
 	TCB_t* highestPriorityTcb = get_highest_priority_ready_tcb();
 	TCB_t* scheduler = get_scheduler();
 
-	while (highestPriorityTcb != NULL)
+	while (highestPriorityTcb != NULL )
 	{
 		if (scheduler->state != PROCST_EXEC)
 		{
@@ -49,13 +49,18 @@ void schedule()
 			get_scheduler()->state = PROCST_EXEC;
 		}
 		
-		if (highestPriorityTcb != NULL)
+		if (highestPriorityTcb != NULL && highestPriorityTcb->tid != 1 )
 		{
 			execute_preemption(highestPriorityTcb);
 		}
-
+		else break;
+			
 		highestPriorityTcb = get_highest_priority_ready_tcb();
 	}
+		printf("saiu\n");
+		
+	
+	
 }
 
 void remove_executing()
@@ -68,13 +73,13 @@ TCB_t* get_scheduler()
 {
 	FirstFila2(tcbs);
 	NextFila2(tcbs);
-
+	
 	return (TCB_t*)GetAtIteratorFila2(tcbs);
 }
 TCB_t* get_main()
 {
 	FirstFila2(tcbs);
-
+	
 	return (TCB_t*)GetAtIteratorFila2(tcbs);
 }
 
@@ -106,6 +111,7 @@ TCB_t* create_scheduler_tcb(void* (*start)(void*), void *arg, int prio)
 	char* stack = malloc(sizeof(char) * STACK_SIZE);
 	TCB_t* newTcb = (TCB_t*)malloc(sizeof(TCB_t));
 	newTcb->prio = prio;
+	newTcb->tid = 1;
 	// Sets up the context.
 	getcontext(&newTcb->context);
 	newTcb->context.uc_link = &get_main()->context;
@@ -123,7 +129,7 @@ TCB_t* create_scheduler_tcb(void* (*start)(void*), void *arg, int prio)
 TCB_t* create_main_tcb()
 {
 	TCB_t* mainTcb = (TCB_t*)malloc(sizeof(TCB_t));
-	mainTcb->prio = 1;
+	mainTcb->prio = 2;
 	getcontext(&mainTcb->context);
 	AppendFila2(tcbs, mainTcb);
 	AppendFila2(executingQueue, mainTcb);
@@ -134,7 +140,9 @@ TCB_t* create_main_tcb()
 
 void put_ready(TCB_t* tcb)
 {
-	//printf("Botei %d\n",tcb->prio);
+	
+	if(tcb->prio == 1)
+		printf("Botei %d\n",tcb->prio);
 
 	switch(tcb->prio)
 		{ 
