@@ -20,7 +20,7 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 	
 	put_ready(newTcb);
 
-	//check_preemption(newTcb);
+	check_preemption(newTcb);
 
 	return newTcb->tid;
 }
@@ -48,14 +48,15 @@ int csetprio(int tid, int prio) {
 
 int cyield(void) {
 	
+	int retorno;
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 	DEBUG_PRINT("*** CYIELD:\n\t tid: %d\n\n", executing->tid);
 	put_ready(executing);
 	remove_executing();
-	swapcontext(&executing->context, &get_scheduler()->context);
+	retorno = swapcontext(&executing->context, &get_scheduler()->context);
 
-	return 0;
+	return retorno;
 }
 
 int cjoin(int tid) {
