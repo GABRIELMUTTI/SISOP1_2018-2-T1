@@ -62,7 +62,7 @@ int cyield(void) {
 int cjoin(int tid) {
 	DEBUG_PRINT("*** CJOIN:\n\t tid: %d\n\n", tid);
 	
-	if(FirstFila2(executingQueue)!=0)printf("ERRRRROU\n");
+	if(FirstFila2(executingQueue)!=0)printf("ERRO CJOIN\n");
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 
 	if(tcb_state(tid) == PROCST_TERMINO) return 0;//thread ja terminou.
@@ -121,7 +121,7 @@ int csignal(csem_t *sem) {
 	TCB_t* blockedTcb = get_highest_priority_blocked_tcb(sem->fila);
 
 	put_ready(blockedTcb);
-	printf("JOIN\n");
+	
 	swapcontext(&executing->context, &get_scheduler()->context);
 
 	return 0;
