@@ -118,8 +118,12 @@ int csignal(csem_t *sem) {
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 	TCB_t* blockedTcb = get_highest_priority_blocked_tcb(sem->fila);
+	remove_highest_priority_blocked_tcb(sem->fila);
 	
 	put_ready(blockedTcb);
+	
+	
+		
 	if(blockedTcb->prio < executing->prio)
 	{
 		put_ready(executing);

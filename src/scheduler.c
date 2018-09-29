@@ -216,8 +216,8 @@ TCB_t* create_main_tcb()
 void put_ready(TCB_t* tcb)
 {
 	
-	if(tcb->prio == 1)
-		DEBUG_PRINT("Botei %d\n",tcb->prio);
+	
+	DEBUG_PRINT("Botei ready %d\n",tcb->tid);
 
 	switch(tcb->prio)
 		{ 
@@ -374,6 +374,33 @@ TCB_t* get_highest_priority_blocked_tcb(PFILA2 queue)
 	return tcb;
 }
 
+void remove_highest_priority_blocked_tcb(PFILA2 queue)
+{
+	TCB_t* tcb;
+	tcb = get_element_of_priority(queue, 0);
+
+	if(tcb == NULL)
+		tcb = get_element_of_priority(queue, 1);
+	
+	if(tcb == NULL)
+		tcb = get_element_of_priority(queue, 2);
+	
+	
+	
+	
+	FirstFila2(queue);
+	TCB_t* tcb2;
+	tcb2 = (TCB_t*)GetAtIteratorFila2(queue);
+	if(tcb -> tid == tcb2->tid)
+		DeleteAtIteratorFila2(queue);
+	else
+		while(NextFila2(queue) != NXTFILA_ENDQUEUE)
+			{
+				tcb = (TCB_t*)GetAtIteratorFila2(queue);
+				if(tcb->tid == tcb2->tid)
+					{DeleteAtIteratorFila2(queue);break;}
+			}
+}
 TCB_t* get_element_of_priority(PFILA2 queue, int prio)
 {
 	if(FirstFila2(queue) != 0) //queue empty

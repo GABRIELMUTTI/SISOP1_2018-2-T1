@@ -51,8 +51,8 @@ int main(int argc, char *argv[]) {
 	
 	printf("Eu sou a main após a criação de ID0 e ID1\n");
 	
-	cjoin(id0);printf("1\n");
-	cjoin(id1);printf("2\n");
+	cjoin(id0);
+	cjoin(id1);
 	cjoin(id2);
 
 	printf("Eu sou a main voltando para terminar o programa\n");
