@@ -54,7 +54,7 @@ void schedule()
 		{
 			execute_preemption(highestPriorityTcb);
 		}
-
+		
 		on_thread_end();
 		highestPriorityTcb = get_highest_priority_ready_tcb();
 		

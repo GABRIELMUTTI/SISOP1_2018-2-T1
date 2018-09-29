@@ -1,7 +1,7 @@
 #ifndef	__SCHEDULER_H__
 #define	__SCHEDULER_H__
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define DEBUG_PRINT(str, ...) \
 	if (DEBUG) { printf(str, __VA_ARGS__); }

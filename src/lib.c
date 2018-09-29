@@ -114,15 +114,18 @@ int cwait(csem_t *sem) {
 
 int csignal(csem_t *sem) {
 	sem->count++;
-
+	
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
-
 	TCB_t* blockedTcb = get_highest_priority_blocked_tcb(sem->fila);
-
-	put_ready(blockedTcb);
 	
-	swapcontext(&executing->context, &get_scheduler()->context);
+	put_ready(blockedTcb);
+	if(blockedTcb->prio < executing->prio)
+	{
+		put_ready(executing);
+		swapcontext(&executing->context, &get_scheduler()->context);
+	}
+
 
 	return 0;
 }

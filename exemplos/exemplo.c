@@ -18,8 +18,9 @@ PFILA2 *fila;
 
 void* func0(void *arg) {
 	cwait(sem);	
+		
 	printf("Eu sou a thread ID0 imprimindo %d\n", *((int *)arg));
-	//csignal(sem);		
+	csignal(sem);	
 	return;
 }
 
@@ -30,9 +31,10 @@ void* func1(void *arg) {
 }
 
 void* func2(void *arg) {
-	
-	printf("Eu sou a thread ID2 imprimindo %d\n", *((int *)arg));
 	csignal(sem);
+	printf("Eu sou a thread ID2 imprimindo %d\n", *((int *)arg));
+	
+	
 }
 
 int main(int argc, char *argv[]) {
@@ -48,7 +50,7 @@ int main(int argc, char *argv[]) {
 	
 	
 	printf("Eu sou a main após a criação de ID0 e ID1\n");
-
+	
 	cjoin(id0);printf("1\n");
 	cjoin(id1);printf("2\n");
 	cjoin(id2);
