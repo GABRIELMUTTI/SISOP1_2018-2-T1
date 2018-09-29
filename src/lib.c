@@ -21,7 +21,7 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 	put_ready(newTcb);
 
 	check_preemption(newTcb);
-
+	printf("tid da tcb criada: %d\n",newTcb->tid);
 	return newTcb->tid;
 }
 
@@ -80,8 +80,10 @@ int cjoin(int tid) {
 }
 
 int csem_init(csem_t *sem, int count) {
+	printf("111111111\n");	
 	sem->count = count;
-	CreateFila2(sem->fila);
+	printf("222222\n");
+	if(CreateFila2(sem->fila) != 0)return -1;
 
 	return 0;
 }
@@ -121,7 +123,7 @@ int csignal(csem_t *sem) {
 }
 
 int cidentify (char *name, int size) {
-	strncpy (name, "Felipe De Mello Flores, 00274712.\nGabriel Mutti Teixeira, 00261586.", size);
+	strncpy (name, "Felipe De Mello Flores, 00274712.\nGabriel Mutti Teixeira, 00261586.\n", size);
 	return 0;
 }
 

@@ -16,12 +16,12 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 	}
 	
 	TCB_t* newTcb = create_tcb(start, arg, prio);
+	DEBUG_PRINT("*** CCREATE:\n\t tid: %d,\tprio: %d ***\n\n", newTcb->tid, newTcb->prio);
 	
 	put_ready(newTcb);
 
 	check_preemption(newTcb);
-
-
+	printf("aaaaaaaaaaaaaaaaaasssssss %d\n",newTcb->tid);
 	return newTcb->tid;
 }
 
@@ -47,31 +47,43 @@ int csetprio(int tid, int prio) {
 }
 
 int cyield(void) {
+	
+	int retorno;
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
-
+	DEBUG_PRINT("*** CYIELD:\n\t tid: %d\n\n", executing->tid);
 	put_ready(executing);
+	remove_executing();
+	retorno = swapcontext(&executing->context, &get_scheduler()->context);
 
-	swapcontext(&executing->context, &get_scheduler()->context);
-
-	return 0;
+	return retorno;
 }
 
 int cjoin(int tid) {
-	
+	DEBUG_PRINT("*** CJOIN:\n\t tid: %d\n\n", tid);
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 
-	put_blocked(executing, blockedQueue);
+	if (tcb_exists(tid) && !exists_blocked_thread(tid))
+	{
+		((TCB_data_t*)executing->data)->tid_joined = tid;
+		put_blocked(blockedQueue);
 
-	swapcontext(&executing->context, &get_scheduler()->context);
+		swapcontext(&executing->context, &get_scheduler()->context);
+	}
+	else
+	{
+		return -1;
+	}
 
 	return 0;
 }
 
 int csem_init(csem_t *sem, int count) {
+	printf("111111111\n");	
 	sem->count = count;
-	CreateFila2(sem->fila);
+	printf("222222\n");
+	if(CreateFila2(sem->fila) != 0)return -1;
 
 	return 0;
 }
@@ -83,7 +95,7 @@ int cwait(csem_t *sem) {
 		FirstFila2(executingQueue);
 		TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 
-		put_blocked(executing, sem->fila);
+		put_blocked(sem->fila);
 
 		swapcontext(&executing->context, &get_scheduler()->context);
 	}
@@ -104,14 +116,14 @@ int csignal(csem_t *sem) {
 	TCB_t* blockedTcb = get_highest_priority_blocked_tcb(sem->fila);
 
 	put_ready(blockedTcb);
-
+	printf("JOIN\n");
 	swapcontext(&executing->context, &get_scheduler()->context);
 
 	return 0;
 }
 
 int cidentify (char *name, int size) {
-	strncpy (name, "Felipe De Mello Flores, 00274712.\nGabriel Mutti Teixeira, 00261586.", size);
+	strncpy (name, "Felipe De Mello Flores, 00274712.\nGabriel Mutti Teixeira, 00261586.\n", size);
 	return 0;
 }
 

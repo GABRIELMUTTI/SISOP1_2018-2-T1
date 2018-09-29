@@ -91,7 +91,6 @@ void remove_tcb(TCB_t* tcb)
 		{
 			DeleteAtIteratorFila2(tcbs);
 			found = 1;
-			num_tcbs = num_tcbs - 1;
 			free(current_tcb->data);
 			free(current_tcb);
 		}
@@ -173,8 +172,10 @@ TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
 	char* stack = malloc(sizeof(char) * STACK_SIZE);
 	TCB_t* newTcb = (TCB_t*)malloc(sizeof(TCB_t));
 	newTcb->prio = prio;
+	
 	newTcb->tid = num_tcbs;
 	newTcb->data = malloc(sizeof(TCB_data_t));
+		
 	num_tcbs = num_tcbs + 1;
 	// Sets up the context.
 	getcontext(&newTcb->context);
