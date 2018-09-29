@@ -69,7 +69,7 @@ int cjoin(int tid) {
 
 	if (tcb_exists(tid) && !exists_blocked_thread(tid))
 	{
-				
+				//printf("ENTROU  %d\n");
 		((TCB_data_t*)executing->data)->tid_joined = tid;
 				
 		put_blocked(blockedQueue);

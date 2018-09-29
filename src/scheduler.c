@@ -186,7 +186,7 @@ TCB_t* create_scheduler_tcb(void* (*start)(void*), void *arg, int prio)
 	num_tcbs = num_tcbs + 1;
 	// Sets up the context.
 	getcontext(&newTcb->context);
-	newTcb->context.uc_link = &get_main()->context;
+	//newTcb->context.uc_link = &get_main()->context;
 	newTcb->context.uc_stack.ss_sp = stack;
 	newTcb->context.uc_stack.ss_size = STACK_SIZE;
 	
