@@ -49,6 +49,7 @@ void remove_executing();
 PFILA2 create_queue();
 int tcb_exists(int tid);
 void on_thread_end();
+int tcb_state(int tid);
 
 TCB_t* get_highest_priority_ready_tcb();
 TCB_t* get_highest_priority_blocked_tcb(PFILA2 queue);

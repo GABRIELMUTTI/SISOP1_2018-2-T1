@@ -21,7 +21,7 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 	put_ready(newTcb);
 
 	check_preemption(newTcb);
-	printf("tid da tcb criada: %d\n",newTcb->tid);
+	
 	return newTcb->tid;
 }
 
@@ -61,28 +61,33 @@ int cyield(void) {
 
 int cjoin(int tid) {
 	DEBUG_PRINT("*** CJOIN:\n\t tid: %d\n\n", tid);
-	FirstFila2(executingQueue);
+	
+	if(FirstFila2(executingQueue)!=0)printf("ERRRRROU\n");
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
+
+	if(tcb_state(tid) == PROCST_TERMINO) return 0;//thread ja terminou.
 
 	if (tcb_exists(tid) && !exists_blocked_thread(tid))
 	{
+				
 		((TCB_data_t*)executing->data)->tid_joined = tid;
+				
 		put_blocked(blockedQueue);
-
+		
 		swapcontext(&executing->context, &get_scheduler()->context);
 	}
 	else
 	{
 		return -1;
 	}
-
+	
 	return 0;
 }
 
 int csem_init(csem_t *sem, int count) {
-	printf("111111111\n");	
+	
 	sem->count = count;
-	printf("222222\n");
+	
 	if(CreateFila2(sem->fila) != 0)return -1;
 
 	return 0;

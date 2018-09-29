@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 	id1 = ccreate(func1, (void *)&i, 0);
 	id2 = ccreate(func2, (void *)&i, 0);
 	
-
+	
 	printf("Eu sou a main após a criação de ID0 e ID1\n");
 
 	cjoin(id0);

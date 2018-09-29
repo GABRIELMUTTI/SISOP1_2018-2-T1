@@ -72,32 +72,15 @@ void on_thread_end()
 	{
 		FirstFila2(executingQueue);
 		TCB_t* finished_tcb = (TCB_t*)GetAtIteratorFila2(executingQueue);
-
+		finished_tcb->state = PROCST_TERMINO;
 		deblock_threads();
 		remove_executing();
-
-		remove_tcb(finished_tcb);
+		
+		
 	}
 }
 
-void remove_tcb(TCB_t* tcb)
-{
-	int end = FirstFila2(tcbs);
-	int found = 0;
-	while (!end && !found)
-	{
-		TCB_t* current_tcb = (TCB_t*)GetAtIteratorFila2(tcbs);
-		if (current_tcb->tid == tcb->tid)
-		{
-			DeleteAtIteratorFila2(tcbs);
-			found = 1;
-			free(current_tcb->data);
-			free(current_tcb);
-		}
 
-		end = NextFila2(tcbs);
-	}	
-}
 
 void deblock_threads()
 {
@@ -175,7 +158,7 @@ TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
 	
 	newTcb->tid = num_tcbs;
 	newTcb->data = malloc(sizeof(TCB_data_t));
-	printf("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO   %d\n",newTcb->tid);	
+		
 	num_tcbs = num_tcbs + 1;
 	// Sets up the context.
 	getcontext(&newTcb->context);
@@ -187,7 +170,7 @@ TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
 	
 	// Put new TCB in the TCB list.
 	AppendFila2(tcbs, newTcb);
-	printf("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO   %d\n",newTcb->tid);
+	
 	return newTcb;
 }
 
@@ -269,6 +252,23 @@ int tcb_exists(int tid)
 	}
 
 	return 0;
+}
+
+int tcb_state(int tid)
+{
+	int end = FirstFila2(tcbs);
+	while (!end)
+	{
+		TCB_t* tcb = (TCB_t*)GetAtIteratorFila2(tcbs);
+		if (tcb->tid == tid)
+		{
+			return tcb->state;
+		}
+
+		end = NextFila2(tcbs);
+	}
+
+	return -1;
 }
 
 int exists_blocked_thread(int tid)
