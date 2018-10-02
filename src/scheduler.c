@@ -12,7 +12,6 @@ void initialize_scheduler_main()
 	blockedQueue = create_queue();
 	executingQueue = create_queue();
 	tcbs = create_queue();
-	sems = create_queue();
 	
     // Create main's TCB.
 	create_main_tcb();
@@ -36,20 +35,11 @@ PFILA2 create_queue()
 
 void schedule()
 {	
-	DEBUG_PRINT("*** SCHEDULING (FIRST TIME) ***\n\n", 0);
-	
 	on_thread_end();
 	TCB_t* highestPriorityTcb = get_highest_priority_ready_tcb();
 	
-
-	
 	while (highestPriorityTcb != NULL)
 	{	
-		DEBUG_PRINT("*** SCHEDULING:\n\t tid: %d,\tprio: %d ***\n\n", highestPriorityTcb->tid, highestPriorityTcb->prio);
-
-
-		
-		
 		if (highestPriorityTcb != NULL)
 		{
 			execute_preemption(highestPriorityTcb);
@@ -57,17 +47,11 @@ void schedule()
 		
 		on_thread_end();
 		highestPriorityTcb = get_highest_priority_ready_tcb();
-		
 	}
-		
-		
-	
-	
 }
 
 void on_thread_end()
 {
-	// If executing thread ended.
 	if (FirstFila2(executingQueue) == 0)
 	{
 		FirstFila2(executingQueue);
@@ -75,12 +59,8 @@ void on_thread_end()
 		finished_tcb->state = PROCST_TERMINO;
 		deblock_threads();
 		remove_executing();
-		
-		
 	}
 }
-
-
 
 void deblock_threads()
 {
@@ -98,8 +78,6 @@ void deblock_threads()
 			put_ready(blocked_tcb);
 			DeleteAtIteratorFila2(blockedQueue);
 			found_blocked = 1;
-
-			DEBUG_PRINT("*** DEBLOCKING:\n\t tid: %d,\tprio: %d ***\n\n", blocked_tcb->tid, blocked_tcb->prio);
 		}
 
 		end = NextFila2(blockedQueue);
@@ -154,12 +132,13 @@ TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
 	// Allocates stack and TCB.
 	char* stack = malloc(sizeof(char) * STACK_SIZE);
 	TCB_t* newTcb = (TCB_t*)malloc(sizeof(TCB_t));
+
 	newTcb->prio = prio;
-	
 	newTcb->tid = num_tcbs;
 	newTcb->data = malloc(sizeof(TCB_data_t));
-		
+	
 	num_tcbs = num_tcbs + 1;
+
 	// Sets up the context.
 	getcontext(&newTcb->context);
 	newTcb->context.uc_link = &get_scheduler()->context;
@@ -180,12 +159,16 @@ TCB_t* create_scheduler_tcb(void* (*start)(void*), void *arg, int prio)
 	// Allocates stack and TCB.
 	char* stack = malloc(sizeof(char) * STACK_SIZE);
 	TCB_t* newTcb = (TCB_t*)malloc(sizeof(TCB_t));
+
 	newTcb->prio = prio;
 	newTcb->tid = 1;
 	newTcb->data = malloc(sizeof(TCB_data_t));
+
 	num_tcbs = num_tcbs + 1;
+
 	// Sets up the context.
 	getcontext(&newTcb->context);
+
 	//newTcb->context.uc_link = &get_main()->context;
 	newTcb->context.uc_stack.ss_sp = stack;
 	newTcb->context.uc_stack.ss_size = STACK_SIZE;
@@ -201,39 +184,37 @@ TCB_t* create_scheduler_tcb(void* (*start)(void*), void *arg, int prio)
 TCB_t* create_main_tcb()
 {
 	TCB_t* mainTcb = (TCB_t*)malloc(sizeof(TCB_t));
+
 	mainTcb->prio = 2;
 	mainTcb->tid = 0;
 	mainTcb->data = malloc(sizeof(TCB_data_t));
+
 	num_tcbs = num_tcbs + 1;
+
 	getcontext(&mainTcb->context);
+
 	AppendFila2(tcbs, mainTcb);
 	AppendFila2(executingQueue, mainTcb);
-
 
 	return mainTcb;
 }
 
 void put_ready(TCB_t* tcb)
 {
-	
-	
-	DEBUG_PRINT("Botei ready %d\n",tcb->tid);
-
 	switch(tcb->prio)
-		{ 
+	{ 
 		case 0:
-                AppendFila2(ready0Queue, tcb);
-                break;
-			case 1:
-                AppendFila2(ready1Queue, tcb);
-                break;
-			case 2:
-                AppendFila2(ready2Queue, tcb);
-                break;
-		}
+        	AppendFila2(ready0Queue, tcb);
+            break;
+		case 1:
+            AppendFila2(ready1Queue, tcb);
+            break;
+		case 2:
+            AppendFila2(ready2Queue, tcb);
+            break;
+	}
 
 	tcb->state = PROCST_APTO;
-
 }
 
 int tcb_exists(int tid)
@@ -311,14 +292,12 @@ void check_preemption(TCB_t* tcb)
     }
 }
 
-
 void execute_preemption(TCB_t* tcb)
 {	
 	remove_highest_priority_ready_tcb();
 
 	if (FirstFila2(executingQueue) == 0)
 	{
-		DEBUG_PRINT("*** EXECUTING_PREEMPTION:\n\t tid: %d,\tprio: %d ***\n\n", tcb->tid, tcb->prio);
 		TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 		DeleteAtIteratorFila2(executingQueue);
 		put_ready(executing);
@@ -330,7 +309,6 @@ void execute_preemption(TCB_t* tcb)
 	}
 	else
 	{
-		DEBUG_PRINT("*** PUTTING IN EXECUTION:\n\t tid: %d,\tprio: %d ***\n\n", tcb->tid, tcb->prio);
 		AppendFila2(executingQueue, tcb);
 		tcb->state = PROCST_EXEC;
 		
@@ -338,13 +316,8 @@ void execute_preemption(TCB_t* tcb)
 	}
 }
 
-
-
 TCB_t* get_highest_priority_ready_tcb()
 {
-	
-	
-	
 	if(FirstFila2(ready0Queue) == 0) //Queue not empty
 		return (TCB_t*)GetAtIteratorFila2(ready0Queue);
 	else
@@ -368,9 +341,6 @@ TCB_t* get_highest_priority_blocked_tcb(PFILA2 queue)
 	if(tcb == NULL)
 		tcb = get_element_of_priority(queue, 2);
 	
-	
-	
-	
 	return tcb;
 }
 
@@ -385,12 +355,10 @@ void remove_highest_priority_blocked_tcb(PFILA2 queue)
 	if(tcb == NULL)
 		tcb = get_element_of_priority(queue, 2);
 	
-	
-	
-	
 	FirstFila2(queue);
 	TCB_t* tcb2;
 	tcb2 = (TCB_t*)GetAtIteratorFila2(queue);
+
 	if(tcb -> tid == tcb2->tid)
 		DeleteAtIteratorFila2(queue);
 	else

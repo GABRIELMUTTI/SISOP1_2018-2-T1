@@ -14,9 +14,8 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 		initialize_scheduler_main();
 		
 	}
-	
+		
 	TCB_t* newTcb = create_tcb(start, arg, prio);
-	DEBUG_PRINT("*** CCREATE:\n\t tid: %d,\tprio: %d ***\n\n", newTcb->tid, newTcb->prio);
 	
 	put_ready(newTcb);
 
@@ -51,7 +50,7 @@ int cyield(void) {
 	int retorno;
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
-	DEBUG_PRINT("*** CYIELD:\n\t tid: %d\n\n", executing->tid);
+
 	put_ready(executing);
 	remove_executing();
 	retorno = swapcontext(&executing->context, &get_scheduler()->context);
@@ -60,8 +59,7 @@ int cyield(void) {
 }
 
 int cjoin(int tid) {
-	DEBUG_PRINT("*** CJOIN:\n\t tid: %d\n\n", tid);
-	
+
 	if(FirstFila2(executingQueue)!=0)printf("ERRO CJOIN\n");
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 
@@ -69,7 +67,6 @@ int cjoin(int tid) {
 
 	if (tcb_exists(tid) && !exists_blocked_thread(tid))
 	{
-				//printf("ENTROU  %d\n");
 		((TCB_data_t*)executing->data)->tid_joined = tid;
 				
 		put_blocked(blockedQueue);

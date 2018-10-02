@@ -31,7 +31,6 @@ PFILA2 executingQueue;
 PFILA2 blockedQueue;
 
 PFILA2 tcbs;
-PFILA2 sems;
 
 /******************************************************************************
 Cria todas as filas. Cria o tcb da main e do scheduler.
