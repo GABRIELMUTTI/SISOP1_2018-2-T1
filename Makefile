@@ -20,8 +20,8 @@ SRC_DIR=./src
 all: compilacao ligacao
 
 compilacao: $(SRC_DIR)/lib.c $(SRC_DIR)/scheduler.c
-	$(CC) -c  $(SRC_DIR)/lib.c -o $(BIN_DIR)/lib.o  -Wall
-	$(CC) -c  $(SRC_DIR)/scheduler.c -o $(BIN_DIR)/scheduler.o  -Wall
+	$(CC) -c  $(SRC_DIR)/lib.c -o $(BIN_DIR)/lib.o  -Wall -g
+	$(CC) -c  $(SRC_DIR)/scheduler.c -o $(BIN_DIR)/scheduler.o  -Wall -g
 
 ligacao: $(BIN_DIR)/lib.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
 	mkdir -p lib	

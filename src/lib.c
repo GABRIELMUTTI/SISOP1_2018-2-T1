@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <string.h>
 #include "../include/support.h"
@@ -26,6 +25,13 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 
 int csetprio(int tid, int prio) {
 
+	if (first_time)
+	{
+		first_time = 0;
+		initialize_scheduler_main();
+		
+	}
+
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 
@@ -47,6 +53,13 @@ int csetprio(int tid, int prio) {
 
 int cyield(void) {
 	
+	if (first_time)
+	{
+		first_time = 0;
+		initialize_scheduler_main();
+		
+	}
+
 	int retorno;
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
@@ -59,6 +72,13 @@ int cyield(void) {
 }
 
 int cjoin(int tid) {
+
+	if (first_time)
+	{
+		first_time = 0;
+		initialize_scheduler_main();
+		
+	}
 
 	if(FirstFila2(executingQueue)!=0)printf("ERRO CJOIN\n");
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
@@ -83,15 +103,30 @@ int cjoin(int tid) {
 
 int csem_init(csem_t *sem, int count) {
 	
+	if (first_time)
+	{
+		first_time = 0;
+		initialize_scheduler_main();
+		
+	}
+
 	sem->count = count;
+	sem->fila = create_queue();
 	
-	if(CreateFila2(sem->fila) != 0)return -1;
+	if(sem->fila == 0)return -1;
 
 	return 0;
 }
 
 int cwait(csem_t *sem) {
 	
+	if (first_time)
+	{
+		first_time = 0;
+		initialize_scheduler_main();
+		
+	}
+
 	if (sem->count <= 0)
 	{
 		FirstFila2(executingQueue);
@@ -110,28 +145,43 @@ int cwait(csem_t *sem) {
 }
 
 int csignal(csem_t *sem) {
+
+	if (first_time)
+	{
+		first_time = 0;
+		initialize_scheduler_main();
+		
+	}
+
 	sem->count++;
 	
 	FirstFila2(executingQueue);
 	TCB_t* executing = (TCB_t*)GetAtIteratorFila2(executingQueue);
 	TCB_t* blockedTcb = get_highest_priority_blocked_tcb(sem->fila);
-	remove_highest_priority_blocked_tcb(sem->fila);
+
+	if (blockedTcb != NULL)
+	{
+		remove_highest_priority_blocked_tcb(sem->fila);
 	
-	put_ready(blockedTcb);
+		put_ready(blockedTcb);
 	
 	
 		
-	if(blockedTcb->prio < executing->prio)
-	{
-		put_ready(executing);
-		swapcontext(&executing->context, &get_scheduler()->context);
+		if(blockedTcb->prio < executing->prio)
+		{
+			put_ready(executing);
+			swapcontext(&executing->context, &get_scheduler()->context);
+		}
 	}
+
+
 
 
 	return 0;
 }
 
 int cidentify (char *name, int size) {
+
 	strncpy (name, "Felipe De Mello Flores, 00274712.\nGabriel Mutti Teixeira, 00261586.\n", size);
 	return 0;
 }

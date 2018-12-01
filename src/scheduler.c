@@ -355,19 +355,24 @@ void remove_highest_priority_blocked_tcb(PFILA2 queue)
 	if(tcb == NULL)
 		tcb = get_element_of_priority(queue, 2);
 	
-	FirstFila2(queue);
-	TCB_t* tcb2;
-	tcb2 = (TCB_t*)GetAtIteratorFila2(queue);
+	if (tcb != NULL)
+	{
+		FirstFila2(queue);
+		TCB_t* tcb2;
+		tcb2 = (TCB_t*)GetAtIteratorFila2(queue);
 
-	if(tcb -> tid == tcb2->tid)
-		DeleteAtIteratorFila2(queue);
-	else
-		while(NextFila2(queue) != NXTFILA_ENDQUEUE)
-			{
-				tcb = (TCB_t*)GetAtIteratorFila2(queue);
-				if(tcb->tid == tcb2->tid)
-					{DeleteAtIteratorFila2(queue);break;}
-			}
+		if(tcb -> tid == tcb2->tid)
+			DeleteAtIteratorFila2(queue);
+		else
+			while(NextFila2(queue) != -NXTFILA_ENDQUEUE)
+				{
+					tcb = (TCB_t*)GetAtIteratorFila2(queue);
+					if(tcb->tid == tcb2->tid)
+						{DeleteAtIteratorFila2(queue);break;}
+				}
+	}
+
+
 }
 TCB_t* get_element_of_priority(PFILA2 queue, int prio)
 {
@@ -380,7 +385,7 @@ TCB_t* get_element_of_priority(PFILA2 queue, int prio)
 	if(tcb -> prio == prio)
 		return tcb;
 	else
-		while(NextFila2(queue) != NXTFILA_ENDQUEUE)
+		while(NextFila2(queue) != -NXTFILA_ENDQUEUE)
 			{
 				tcb = (TCB_t*)GetAtIteratorFila2(queue);
 				if(tcb -> prio == prio)
