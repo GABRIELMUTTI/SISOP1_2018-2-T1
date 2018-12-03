@@ -11,29 +11,29 @@
 #include "../include/support.h"
 #include "../include/cthread.h"
 #include <stdio.h>
-
+#include <stdlib.h>
 
 csem_t *sem;
-PFILA2 *fila;
+PFILA2 fila;
 
 void* func0(void *arg) {
 	cwait(sem);	
 		
 	printf("Eu sou a thread ID0 imprimindo %d\n", *((int *)arg));
 	csignal(sem);	
-	return;
+	return NULL;
 }
 
 void* func1(void *arg) {
 	cwait(sem);
 	printf("Eu sou a thread ID1 imprimindo %d\n", *((int *)arg));
-	
+	return NULL;
 }
 
 void* func2(void *arg) {
 	csignal(sem);
 	printf("Eu sou a thread ID2 imprimindo %d\n", *((int *)arg));
-	
+	return NULL;
 	
 }
 
@@ -56,5 +56,7 @@ int main(int argc, char *argv[]) {
 	cjoin(id2);
 
 	printf("Eu sou a main voltando para terminar o programa\n");
+
+	return 0;
 }
 

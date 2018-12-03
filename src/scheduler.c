@@ -17,7 +17,7 @@ void initialize_scheduler_main()
 	create_main_tcb();
 	
     // Create scheduler's TCB.
-	create_scheduler_tcb(&schedule, 0, 2);
+	create_scheduler_tcb((void* (*)(void*))(&schedule), 0, 2);
 }
 
 PFILA2 create_queue()
@@ -145,7 +145,8 @@ TCB_t* create_tcb(void* (*start)(void*), void *arg, int prio)
 	newTcb->context.uc_stack.ss_sp = stack;
 	newTcb->context.uc_stack.ss_size = STACK_SIZE;
 	
-	makecontext(&newTcb->context, start, 1, arg);		
+	// *** MUDANÇA: Cast para remover um warning.
+	makecontext(&newTcb->context, (void (*)(void))(start), 1, arg);		
 	
 	// Put new TCB in the TCB list.
 	AppendFila2(tcbs, newTcb);
@@ -173,7 +174,8 @@ TCB_t* create_scheduler_tcb(void* (*start)(void*), void *arg, int prio)
 	newTcb->context.uc_stack.ss_sp = stack;
 	newTcb->context.uc_stack.ss_size = STACK_SIZE;
 	
-	makecontext(&newTcb->context, start, 1, arg);		
+	// *** MUDANÇA: Cast para remover um warning.
+	makecontext(&newTcb->context, (void (*)(void))(start), 1, arg);		
 	
 	// Put new TCB in the TCB list.
 	AppendFila2(tcbs, newTcb);
